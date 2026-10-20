@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Women's Diabetes Risk Prediction System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js -- used for the Feature Importance bar chart only.
+         (The confusion matrix is rendered as a plain table -- Chart.js's
+         'matrix' chart type needs a plugin that isn't loaded here.) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- ==================== LOGIN PAGE ==================== -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="auth-shell">
+
+                <!-- Decorative brand panel -->
+                <div class="auth-brand">
+                    <div class="auth-brand-glow g1"></div>
+                    <div class="auth-brand-glow g2"></div>
+                    <div class="auth-brand-glow g3"></div>
+                    <div class="auth-brand-content">
+                        <div class="auth-brand-eyebrow">Why This Matters</div>
+                        <h1 class="auth-brand-title">A major public health concern —<br><em>and women carry a distinct share of it.</em></h1>
+                        <p class="auth-brand-copy">Diabetes is a major public health concern globally, especially in developing regions like South Africa. Women face unique risks shaped by biological, lifestyle, and socio-economic factors. Millions of people worldwide live with diabetes today, with women heavily affected by the condition.</p>
+                    </div>
+                </div>
+
+                <!-- Login / Register forms -->
+                <div class="login-card">
+                    <h1>Diabetes Risk Prediction</h1>
+                    <p class="subtitle">Women's Health Assessment System</p>
+
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="loginTab">Sign In</button>
+                        <button class="auth-tab" data-tab="registerTab">Register</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div id="loginTab" class="auth-form active">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="loginEmail" placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="loginPassword" placeholder="Enter your password">
+                        </div>
+                        <button class="btn btn-primary full-width" id="loginBtn">Sign in</button>
+                        <p id="loginError" class="error-message hidden"></p>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerTab" class="auth-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="regName" placeholder="Jane Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="regEmail" placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="regPassword" placeholder="Min 6 characters">
+                        </div>
+                        <button class="btn btn-success full-width" id="registerBtn">Create account</button>
+                        <p id="registerError" class="error-message hidden"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN DASHBOARD ==================== -->
+    <div id="mainPage" class="page">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <div class="header-titles">
+                    <h1>Diabetes Risk Prediction</h1>
+                    <span class="welcome-text">Welcome back, <span id="userName">User</span></span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-warning" id="retrainBtn">Retrain Model</button>
+                <button class="btn btn-danger" id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="predictionTab">Prediction</button>
+            <button class="tab-btn" data-tab="performanceTab">Performance</button>
+            <button class="tab-btn" data-tab="historyTab">History</button>
+            <button class="tab-btn" data-tab="profileTab">Profile</button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- ========== PREDICTION TAB ========== -->
+            <div id="predictionTab" class="tab-panel active">
+                <div class="prediction-layout">
+                    <!-- Left: Input Form -->
+                    <div class="prediction-form">
+                        <h2>Enter Your Health Information</h2>
+
+                        <!-- Health Metrics -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Pregnancies (0-17)</label>
+                                <input type="number" id="pregnancies" min="0" max="17" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Glucose (mg/dL)</label>
+                                <input type="number" id="glucose" min="0" max="200" value="100">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Blood Pressure (mmHg)</label>
+                                <input type="number" id="bloodPressure" min="0" max="122" value="70">
+                            </div>
+                            <div class="form-group">
+                                <label>Skin Thickness (mm)</label>
+                                <input type="number" id="skinThickness" min="0" max="99" value="20">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Insulin (μU/mL)</label>
+                                <input type="number" id="insulin" min="0" max="846" value="80">
+                            </div>
+                            <div class="form-group">
+                                <label>BMI (kg/m²)</label>
+                                <input type="number" id="bmi" min="0" max="67" step="0.1" value="25.0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Age (years)</label>
+                                <input type="number" id="age" min="21" max="81" value="30">
+                            </div>
+                            <div class="form-group">
+                                <label>Diabetes Pedigree</label>
+                                <input type="text" id="diabetesPedigree" readonly placeholder="0.000">
+                            </div>
+                        </div>
+
+                        <!-- Family History -->
+                        <h3>Family History</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Parent Diabetic?</label>
+                                <select id="parent_diabetes">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Grandparent Diabetic?</label>
+                                <select id="grandparent_diabetes">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Sibling Diabetic?</label>
+                                <select id="sibling_diabetes">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cousin Diabetic?</label>
+                                <select id="cousin_diabetes">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="button-row">
+                            <button class="btn btn-info" id="calculateDpfBtn">Calculate DPF</button>
+                            <button class="btn btn-primary" id="predictBtn">Predict Diabetes Risk</button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Info Panel -->
+                    <div class="info-panel">
+                        <h3>Diabetes Risk Factors</h3>
+                        <ul>
+                            <li>Family history of diabetes</li>
+                            <li>Being overweight or obese</li>
+                            <li>Age 45 or older</li>
+                            <li>Physical inactivity</li>
+                            <li>Previous gestational diabetes</li>
+                            <li>High blood pressure</li>
+                            <li>Abnormal cholesterol levels</li>
+                            <li>History of heart disease</li>
+                        </ul>
+
+                        <h3>Prevention Tips</h3>
+                        <ul>
+                            <li>Eat a balanced, healthy diet</li>
+                            <li>Exercise regularly (150 min/week)</li>
+                            <li>Maintain a healthy weight</li>
+                            <li>Don't smoke</li>
+                            <li>Regular health check-ups</li>
+                            <li>Get adequate sleep</li>
+                            <li>Manage stress effectively</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== PERFORMANCE TAB ========== -->
+            <div id="performanceTab" class="tab-panel">
+                <h2>Model Performance Analysis</h2>
+
+                <!-- Metrics Cards -->
+                <div class="metrics-grid" id="metricsGrid">
+                    <div class="metric-card">
+                        <h4>Accuracy</h4>
+                        <div class="metric-value" id="accuracyValue">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Precision</h4>
+                        <div class="metric-value" id="precisionValue">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Recall</h4>
+                        <div class="metric-value" id="recallValue">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>F1 Score</h4>
+                        <div class="metric-value" id="f1Value">--</div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <h3>Feature Importance</h3>
+                        <canvas id="featureImportanceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Confusion Matrix</h3>
+                        <div id="confusionMatrixTable"></div>
+                        <div id="confusionInterpretation" class="interpretation"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== HISTORY TAB ========== -->
+            <div id="historyTab" class="tab-panel">
+                <div class="history-header">
+                    <h2>Prediction History</h2>
+                    <button class="btn btn-primary" id="refreshHistoryBtn">Refresh History</button>
+                </div>
+                <div class="table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Pregnancies</th>
+                                <th>Glucose</th>
+                                <th>BP</th>
+                                <th>BMI</th>
+                                <th>Age</th>
+                                <th>Risk %</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr><td colspan="8" class="no-data">No predictions yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== PROFILE TAB ========== -->
+            <div id="profileTab" class="tab-panel">
+                <h2>User Profile</h2>
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <p><strong>Name:</strong> <span id="profileName">--</span></p>
+                        <p><strong>Email:</strong> <span id="profileEmail">--</span></p>
+                    </div>
+                    <div class="profile-stats">
+                        <h3>Your Statistics</h3>
+                        <div class="stat-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Predictions</span>
+                                <span class="stat-value" id="statTotal">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Low Risk</span>
+                                <span class="stat-value" id="statLow">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">High Risk</span>
+                                <span class="stat-value" id="statHigh">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Risk Percentage</span>
+                                <span class="stat-value" id="statRisk">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-info" id="exportBtn">Export Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== RESULTS MODAL ==================== -->
+    <div id="resultsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Diabetes Risk Assessment Results</h2>
+                <button class="modal-close" id="closeResultsBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="resultHeader" class="result-header">
+                    <div class="gauge-circle" id="gaugeCircle">
+                        <div class="gauge-circle-inner">
+                            <div id="resultPercentage" class="result-percentage">0%</div>
+                        </div>
+                    </div>
+                    <div id="resultTitle" class="result-title">LOW RISK</div>
+                </div>
+                <div id="resultDescription" class="result-description"></div>
+
+                <!-- Risk Bar -->
+                <div class="risk-bar-container">
+                    <div class="risk-bar-track">
+                        <div class="risk-bar-fill" id="riskBarFill" style="width: 0%;"></div>
+                        <div class="risk-bar-marker" id="riskBarMarker" style="left: 0%;">▼</div>
+                    </div>
+                    <div class="risk-bar-labels">
+                        <span>0%</span>
+                        <span>40% (Threshold)</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+
+                <div id="resultSummary" class="result-summary"></div>
+
+                <div id="resultRecommendations" class="result-recommendations">
+                    <h3>Personalized Recommendations</h3>
+                    <ul id="recommendationList"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="closeResultsBtn2">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== LOADING OVERLAY ==================== -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>Processing your request...</p>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="/static/index.js"></script>
+
+    <!-- Purely decorative enhancement: draws the circular gauge ring
+         behind the risk percentage in the results modal. Wrapped in
+         try/catch and isolated from index.js -- if this ever fails for
+         any reason, the modal still works exactly as before, just
+         without the ring animation. -->
+    <script>
+    (function(){
+      try{
+        var pctEl = document.getElementById('resultPercentage');
+        var ring = document.getElementById('gaugeCircle');
+        var header = document.getElementById('resultHeader');
+        if(!pctEl || !ring || !header) return;
+
+        function sync(){
+          var val = parseFloat(pctEl.textContent || '0');
+          if (isNaN(val)) val = 0;
+          val = Math.max(0, Math.min(100, val));
+          ring.style.setProperty('--gauge-deg', (val * 3.6).toFixed(1));
+          var isHigh = header.classList.contains('high-risk');
+          ring.style.setProperty('--ring-color', isHigh ? 'var(--risk-high)' : 'var(--risk-low)');
+        }
+
+        var obs = new MutationObserver(sync);
+        obs.observe(pctEl, { childList: true, characterData: true, subtree: true });
+        obs.observe(header, { attributes: true, attributeFilter: ['class'] });
+      }catch(e){ /* decorative only -- fail silently */ }
+    })();
+    </script>
+</body>
+</html>
